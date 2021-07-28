@@ -1,6 +1,8 @@
-from fastapi import FastAPI , Depends
+from fastapi import FastAPI , Depends, status
 from fastapi.param_functions import Body
 from sqlalchemy.orm import Session
+from starlette.responses import Response
+from starlette.status import HTTP_204_NO_CONTENT
 import schemas, models
 from database import SessionLocal, engine
 
@@ -25,6 +27,28 @@ def create(request: schemas.Blog, db:Session=Depends(get_db)):
     db.commit()
     db.refresh(new_blog)
     return new_blog
+
+@app.get('/blog')
+def all(db:Session=Depends(get_db)):
+    blogs = db.query(models.Blog).all()
+    return blogs
+
+@app.get('/blog/{id}')
+def show(id, db:Session=Depends(get_db)):
+    blog = db.query(models.Blog).filter(models.Blog.id == id).first()
+    return blog
+
+@app.delete('/blog/{id}',status_code=status.HTTP_204_NO_CONTENT)
+def destroy(id, db:Session=Depends(get_db)):
+    db.query(models.Blog).filter(models.Blog.id == id).delete(synchronize_session=False)
+    db.commit()
+    return Response(status_code=HTTP_204_NO_CONTENT)
+
+@app.put('/blog/{id}',status_code=status.HTTP_202_ACCEPTED)
+def update(id, request: schemas.Blog, db:Session=Depends(get_db)):
+    db.query(models.Blog).filter(models.Blog.id == id).update({'title':request.title, 'body':request.body})
+    db.commit()
+    return f'BLog with id {id} updated'
 
 
 @app.get('/')
