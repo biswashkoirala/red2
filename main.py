@@ -1,9 +1,6 @@
-from os import stat
 from fastapi import FastAPI , Depends, status
 from fastapi.exceptions import HTTPException
-from fastapi.param_functions import Body
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.functions import mode, user
 from starlette.responses import Response
 from starlette.status import HTTP_204_NO_CONTENT
 import schemas, models
@@ -54,6 +51,20 @@ def update(id, request: schemas.Blog, db:Session=Depends(get_db)):
     db.query(models.Blog).filter(models.Blog.id == id).update({'title':request.title, 'body':request.body})
     db.commit()
     return f'BLog with id {id} updated'
+
+@app.put('/blog/{id}/upvote',status_code=status.HTTP_202_ACCEPTED)
+def upvote(id, db:Session=Depends(get_db)):
+    score = db.query(models.Blog).filter(models.Blog.id==id).first().score
+    db.query(models.Blog).filter(models.Blog.id==id).update({'score':score+1})
+    db.commit()
+    return f'Score for BLog with id {id} upvoted'
+
+@app.put('/blog/{id}/downvote',status_code=status.HTTP_202_ACCEPTED)
+def downvote(id, db:Session=Depends(get_db)):
+    score = db.query(models.Blog).filter(models.Blog.id==id).first().score
+    db.query(models.Blog).filter(models.Blog.id==id).update({'score':score-1})
+    db.commit()
+    return f'Score for BLog with id {id} downvoted'
 
 
 @app.get('/')

@@ -1,5 +1,4 @@
 from typing import List
-from database import Base
 from pydantic import BaseModel
 
 
@@ -7,6 +6,7 @@ from pydantic import BaseModel
 class BlogBase(BaseModel):
     title: str
     body: str
+    #score: int
     
 
 class Blog(BlogBase):
@@ -37,3 +37,9 @@ class ShowBlog(BaseModel):
 
     class Config():
         orm_mode=True
+
+
+
+
+# schemas : for view type. edit the view : pydantic
+# models : for main database structure : SQLite
