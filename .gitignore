@@ -2,3 +2,4 @@ mynotes.txt
 __pycache__
 red2-env
 .DS_Store   # for MacOS
+red2-app
